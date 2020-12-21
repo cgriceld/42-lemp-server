@@ -14,7 +14,7 @@ RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=ru/ST=Moscow/L
 
 # NGINX
 # copy server block config file to nginx
-RUN cp ./srcs/localhost.conf /etc/nginx/sites-available
+COPY ./srcs/localhost.conf /etc/nginx/sites-available
 # activate it
 RUN ln -s /etc/nginx/sites-available/localhost.conf /etc/nginx/sites-enabled/
 # create root dir
@@ -42,10 +42,8 @@ COPY ./srcs/config.inc.php /var/www/localhost/phpmyadmin
 RUN chown -R www-data: /var/www/localhost/phpmyadmin
 
 # MYSQL
-RUN service mysql start
-# access mysql shell, -user = root, -password, -e = execute commands and quit
-RUN mysql -u root -p -e "CREATE DATABASE cgriceldbase;CREATE USER 'cgriceld'@'localhost' IDENTIFIED BY 'borntocode'; \
-							GRANT ALL PRIVILEGES ON cgriceldbase . * TO 'cgriceld'@'localhost';FLUSH PRIVILEGES;"
+RUN service mysql start && mysql -u root -e "CREATE DATABASE cgriceldbase;GRANT ALL PRIVILEGES ON cgriceldbase . * TO 'root'@'localhost' identified by 'root';FLUSH PRIVILEGES;"
+# access mysql shell, -user = root, -p = password, -e = execute commands and quit
 
 # CREATE DATABASE cgriceldbase; - create database
 # CREATE USER 'cgriceld'@'localhost' IDENTIFIED BY 'borntocode'; - create new user
