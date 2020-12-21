@@ -1,13 +1,12 @@
 FROM debian:buster
 
 # running from / by default
-RUN apt-get -y update
+RUN apt-get update
 RUN apt-get -y upgrade
 # install stuff
 # nginx will automatically start after the installation is complete
-RUN apt-get -y install nginx default-mysql-server php7.3 php-fpm php-mysql openssl
-# fot phpMyAdmin and wordpress
-RUN apt-get -y wget php-mbstring php-zip php-gd php-curl php-gd php-intl php-soap php-xml php-xmlrpc
+RUN apt-get -y install nginx default-mysql-server php php-fpm php-mysql
+RUN apt-get -y install openssl wget
 
 # SSL
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=ru/ST=Moscow/L=Moscow/O=no/OU=no/CN=localhost/" \
@@ -65,6 +64,6 @@ RUN chown -R www-data: /var/www/localhost/wordpress
 ENV indexstate=on
 EXPOSE 80 443
 
-COPY ./srcs/run.sh /
+COPY ./srcs/run.sh .
 
 CMD ["bash", "run.sh"]
