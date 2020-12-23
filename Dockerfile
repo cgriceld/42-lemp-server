@@ -1,11 +1,7 @@
 FROM debian:buster
 
-# running from / by default
-RUN apt-get update
-RUN apt-get -y upgrade
-# install stuff
-# nginx will automatically start after the installation is complete
-RUN apt-get -y install nginx default-mysql-server php php-fpm php-mysql
+RUN apt-get update && apt-get -y upgrade
+RUN apt-get -y install nginx default-mysql-server php7.3 php-fpm php-mysql
 RUN apt-get -y install openssl wget
 
 # SSL
@@ -13,53 +9,34 @@ RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=ru/ST=Moscow/L
 			-keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
 
 # NGINX
-# copy server block config file to nginx
-COPY ./srcs/localhost.conf /etc/nginx/sites-available
-# activate it
-RUN ln -s /etc/nginx/sites-available/localhost.conf /etc/nginx/sites-enabled/
-# create root dir
-RUN mkdir -p /var/www/localhost
-# change the ownership of the root dir to the nginx user (www-data):
-RUN chown -R www-data: /var/www/localhost
-# copy home page to root dir
-COPY ./srcs/index.html /var/www/localhost
+COPY ./srcs/nginx.conf /etc/nginx/sites-available
+RUN ln -s /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-enabled/
+RUN rm /etc/nginx/sites-enabled/default
 
 # PHPMYADMIN
-# download tarball, latest version, eng language
-RUN wget https://files.phpmyadmin.net/phpMyAdmin/5.0.4/phpMyAdmin-5.0.4-english.tar.gz
-# extraxt it
-RUN tar -xvf phpMyAdmin-5.0.4-english.tar.gz
-# move to folder
-RUN mv phpMyAdmin-5.0.4-english/ /var/www/localhost/phpmyadmin
-# delete install archive
-RUN rm phpMyAdmin-5.0.4-english.tar.gz
-# create cache dir and give rights
+WORKDIR /var/www/localhost
+RUN wget https://files.phpmyadmin.net/phpMyAdmin/5.0.4/phpMyAdmin-5.0.4-all-languages.tar.gz
+RUN tar -xzvf phpMyAdmin-5.0.4-all-languages.tar.gz
+RUN mv phpMyAdmin-5.0.4-all-languages phpmyadmin
+RUN rm phpMyAdmin-5.0.4-all-languages.tar.gz
+COPY ./srcs/config.inc.php ./phpmyadmin
+WORKDIR /
 RUN mkdir -p /var/lib/phpmyadmin/tmp
 RUN chown -R www-data: /var/lib/phpmyadmin
-# delete draft and copy config file to phpmyadmin dir, give rights
-RUN rm /var/www/localhost/phpmyadmin/config.sample.inc.php
-COPY ./srcs/config.inc.php /var/www/localhost/phpmyadmin
 RUN chown -R www-data: /var/www/localhost/phpmyadmin
 
 # MYSQL
-RUN service mysql start && mysql -u root -e "CREATE DATABASE cgriceldbase;GRANT ALL PRIVILEGES ON cgriceldbase . * TO 'root'@'localhost' identified by 'root';FLUSH PRIVILEGES;"
-# access mysql shell, -user = root, -p = password, -e = execute commands and quit
-
-# CREATE DATABASE cgriceldbase; - create database
-# CREATE USER 'cgriceld'@'localhost' IDENTIFIED BY 'borntocode'; - create new user
-# GRANT ALL PRIVILEGES ON cgriceldbase . * TO 'cgriceld'@'localhost'; - give access to new database, * . * - all bases, all tables
-# FLUSH PRIVILEGES; - restart priviliges
+COPY ./srcs/sql.sh .
+RUN bash sql.sh
 
 # WORDPRESS
 RUN wget https://wordpress.org/latest.tar.gz
-RUN tar -xvf latest.tar.gz
-RUN rm latest.tar.gz
-RUN rm wordpress/wp-config-sample.php
-RUN mv wordpress /var/www/localhost/wordpress
-COPY ./srcs/wp-config.php /var/www/localhost/wordpress
+RUN tar -xzvf latest.tar.gz
+RUN rm latest.tar.gz 
+RUN mv wordpress /var/www/localhost/
 RUN chown -R www-data: /var/www/localhost/wordpress
+COPY ./srcs/wp-config.php /var/www/localhost/wordpress
 
-ENV indexstate=on
 EXPOSE 80 443
 
 COPY ./srcs/run.sh .
