@@ -1,4 +1,6 @@
 #!/bin/bash
 
-docker stop web_serv
-dpcker rmi ft_server
+# stop container
+docker stop webserv
+# delete image
+docker rmi iweb

@@ -9,7 +9,7 @@
  *
  * @package PhpMyAdmin
  */
-declare(strict_types=1);
+//declare(strict_types=1);
 
 /**
  * This is needed for cookie based authentication to encrypt password in
@@ -41,7 +41,7 @@ $cfg['Servers'][$i]['AllowNoPassword'] = true;
 // $cfg['Servers'][$i]['controlhost'] = '';
 // $cfg['Servers'][$i]['controlport'] = '';
 $cfg['Servers'][$i]['controluser'] = 'pma';
-$cfg['Servers'][$i]['controlpass'] = 'borntocode';
+$cfg['Servers'][$i]['controlpass'] = 'school21';
 
 /* Storage database and tables */
 $cfg['Servers'][$i]['pmadb'] = 'phpmyadmin';
@@ -114,7 +114,7 @@ $cfg['SaveDir'] = '';
  * uncomment the desired line:
  * default = 'en'
  */
-//$cfg['DefaultLang'] = 'en';
+$cfg['DefaultLang'] = 'ru';
 //$cfg['DefaultLang'] = 'de';
 
 /**
