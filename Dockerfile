@@ -3,15 +3,16 @@ FROM debian:buster
 # update system and install stuff
 RUN apt-get update && apt-get -y upgrade
 RUN apt-get -y install nginx default-mysql-server php7.3 php-fpm php-mysql php-mbstring
-RUN apt-get -y install openssl wget
+RUN apt-get -y install openssl wget vim
 # copy CMD script
 COPY ./srcs/run.sh .
+COPY ./srcs/indexstate.sh .
 # autoindex on by default
 ENV INDEXSTATE on
 
-# SSL
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=ru/ST=Moscow/L=Moscow/O=no/OU=no/CN=localhost/" \
-			-keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
+# SSL, generate private key and certificate
+RUN openssl req -x509 -nodes -newkey rsa:2048 -days 30 -keyout /etc/ssl/private/nginx-selfsigned.key \
+		-out /etc/ssl/certs/nginx-selfsigned.crt -subj "/C=ru/ST=Moscow/L=Moscow/O=no/OU=no/CN=localhost/"
 
 # NGINX
 # copy config
@@ -23,11 +24,12 @@ RUN rm /etc/nginx/sites-enabled/default
 # open ports
 EXPOSE 80 443
 
-# WORDPRESS
 # create root dir and give rights to nginx
 RUN mkdir -p /var/www/ft_server/
 RUN chown -R www-data:www-data /var/www/ft_server/
-# install wordpress, extract it and delete installation file
+
+# WORDPRESS
+# install wordpress, extract it and delete installation archive
 RUN wget https://wordpress.org/latest.tar.gz
 RUN tar -xvf latest.tar.gz
 RUN rm latest.tar.gz
