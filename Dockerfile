@@ -12,7 +12,7 @@ ENV INDEXSTATE on
 
 # SSL, generate private key and certificate
 RUN openssl req -x509 -nodes -newkey rsa:2048 -days 30 -keyout /etc/ssl/private/nginx-selfsigned.key \
-		-out /etc/ssl/certs/nginx-selfsigned.crt -subj "/C=ru/ST=Moscow/L=Moscow/O=no/OU=no/CN=localhost/"
+		-out /etc/ssl/certs/nginx-selfsigned.crt -subj "/C=ru/ST=Moscow/L=Moscow/O=school21/OU=6thwave/CN=localhost/"
 
 # NGINX
 # copy config
