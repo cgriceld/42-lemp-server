@@ -1,7 +1,7 @@
 # LEMP-server
 
 **Simple LEMP (Linux, Nginx, MySQL, PHP) web server using Docker**\
-System & network administration 42 project.
+42 system & network administration project.
 
 To build image and launch server with enabled autoindex run `bash build.sh on`; to run with disabled autoindex (you will get `403 Forbidden` error then) use `bash build.sh off`.
 
